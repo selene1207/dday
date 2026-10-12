@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>모임 D-Day 카운터</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--text:#1f2430;--sub:#6b7280;--accent:#3b6cf6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14161b;--card:#1d2027;--text:#e8eaf0;--sub:#9aa1af;--accent:#7b9bff}}
+:root[data-theme="dark"]{--bg:#14161b;--card:#1d2027;--text:#e8eaf0;--sub:#9aa1af;--accent:#7b9bff}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;display:flex;justify-content:center;padding:24px 16px}
+.card{background:var(--card);border-radius:16px;padding:24px;max-width:420px;width:100%;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+h1{font-size:20px;margin:0 0 4px}
+p.sub{color:var(--sub);font-size:14px;margin:0 0 20px}
+label{display:block;font-size:13px;color:var(--sub);margin:12px 0 4px}
+input{width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--sub);border-radius:8px;background:transparent;color:var(--text);font-size:15px}
+button{margin-top:16px;width:100%;padding:12px;border:0;border-radius:8px;background:var(--accent);color:#fff;font-size:15px;cursor:pointer}
+#result{margin-top:20px;font-size:28px;font-weight:700;text-align:center;min-height:40px}
+#note{text-align:center;color:var(--sub);font-size:13px;min-height:18px}
+footer{margin-top:16px;font-size:12px;color:var(--sub);text-align:center}
+</style>
+<script src="js/holidays.js"></script>
+</head>
+<body>
+<div class="card">
+  <h1>모임 D-Day 카운터</h1>
+  <p class="sub">모임 날짜까지 며칠 남았는지 계산해 드려요.</p>
+
+  <label for="name">모임 이름</label>
+  <input id="name" type="text" value="연말 송년회">
+
+  <label for="date">모임 날짜</label>
+  <input id="date" type="date" value="2026-12-25">
+
+  <button id="go">남은 날짜 계산하기</button>
+
+  <div id="result"></div>
+  <div id="note"></div>
+  <footer>마지막 계산: <span id="lastUpdate">-</span></footer>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+function daysUntil(dateStr) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const target = new Date(y, m - 1, d);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.round((target - today) / (1000 * 60 * 60 * 24));
+}
+
+function label(days) {
+  if (days > 0) return "D-" + days;
+  if (days === 0) return "D-Day!";
+  return "D+" + Math.abs(days);
+}
+
+$("go").addEventListener("click", () => {
+  const name = $("name").value.trim() || "모임";
+  const dateStr = $("date").value;
+  if (!dateStr) {
+    $("result").textContent = "날짜를 선택해 주세요.";
+    return;
+  }
+  const days = daysUntil(dateStr);
+  $("result").textContent = name + " " + label(days);
+
+  if (typeof HOLIDAYS !== "undefined" && HOLIDAYS.includes(dateStr)) {
+    $("note").textContent = "공휴일이에요!";
+  } else {
+    $("note").textContent = "";
+  }
+
+  $("lastUpdate").textContent = new Date().toLocaleTimeString("ko-KR");
+});
+</script>
+</body>
+</html>
