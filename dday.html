@@ -15,7 +15,7 @@ p.sub{color:var(--sub);font-size:14px;margin:0 0 20px}
 label{display:block;font-size:13px;color:var(--sub);margin:12px 0 4px}
 input{width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--sub);border-radius:8px;background:transparent;color:var(--text);font-size:15px}
 button{margin-top:16px;width:100%;padding:12px;border:0;border-radius:8px;background:var(--accent);color:#fff;font-size:15px;cursor:pointer}
-#result{margin-top:20px;font-size:28px;font-weight:700;text-align:center;min-height:40px}
+#result{margin-top:20px;font-size:28px;font-weight:700;text-align:center;min-height:40px;overflow-wrap:anywhere}
 #note{text-align:center;color:var(--sub);font-size:13px;min-height:18px}
 footer{margin-top:16px;font-size:12px;color:var(--sub);text-align:center}
 </style>
@@ -50,11 +50,12 @@ function daysUntil(dateStr) {
   return Math.round((target - today) / (1000 * 60 * 60 * 24));
 }
 
-function label(days) {
-  if (days > 0) return "D-" + days;
-  if (days === 0) return "D-Day!";
-  return "D+" + Math.abs(days);
-}
+
+   function label(days) {
+     if (days > 0) return "D\u2011" + days;
+     if (days === 0) return "D\u2011Day!";
+     return "D+" + Math.abs(days);
+   }
 
 $("go").addEventListener("click", () => {
   const name = $("name").value.trim() || "모임";
