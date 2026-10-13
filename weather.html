@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>도시 날씨 보기</title>
+<style>
+body{margin:0;background:#f6f7f9;color:#1f2430;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;display:flex;justify-content:center;padding:24px 16px}
+.card{background:#fff;border-radius:16px;padding:24px;max-width:420px;width:100%;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+h1{font-size:20px;margin:0 0 4px}
+p.sub{color:#6b7280;font-size:14px;margin:0 0 20px}
+label{display:block;font-size:13px;color:#6b7280;margin:12px 0 4px}
+input{width:100%;box-sizing:border-box;padding:10px;border:1px solid #6b7280;border-radius:8px;font-size:15px}
+button{margin-top:16px;width:100%;padding:12px;border:0;border-radius:8px;background:#3b6cf6;color:#fff;font-size:15px;cursor:pointer}
+#result{margin-top:20px;font-size:26px;font-weight:700;text-align:center;min-height:40px;overflow-wrap:anywhere}
+#note{text-align:center;color:#6b7280;font-size:14px;min-height:20px}
+</style>
+<script src="config.js"></script>
+</head>
+<body>
+<div class="card">
+  <h1>도시 날씨 보기</h1>
+  <p class="sub">도시 이름(영어)을 입력하면 현재 날씨를 보여 드려요.</p>
+
+  <label for="city">도시 이름</label>
+  <input id="city" type="text" value="Seoul">
+
+  <button id="go">날씨 보기</button>
+
+  <div id="result"></div>
+  <div id="note"></div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+async function showWeather() {
+  const city = $("city").value.trim();
+  $("note").textContent = "";
+
+  if (!city) {
+    $("result").textContent = "도시 이름을 입력해 주세요.";
+    return;
+  }
+  if (typeof WEATHER_API_KEY === "undefined" || WEATHER_API_KEY.includes("여기에")) {
+    $("result").textContent = "키를 먼저 넣어 주세요.";
+    $("note").textContent = "config.js 파일에 내 키를 붙여넣고 저장한 뒤 F5를 누르세요.";
+    return;
+  }
+
+  $("result").textContent = "불러오는 중...";
+  try {
+    const url = "https://api.openweathermap.org/data/2.5/weather?q=" +
+      encodeURIComponent(city) + "&appid=" + encodeURIComponent(WEATHER_API_KEY) +
+      "&units=metric&lang=kr";
+    const res = await fetch(url);
+
+    if (res.status === 401) {
+      $("result").textContent = "키가 아직 사용할 수 없어요.";
+      $("note").textContent = "새 키는 켜지기까지 시간이 걸려요. 키가 정확한지 확인하고 잠시 뒤에 다시 시도하세요.";
+      return;
+    }
+    if (res.status === 404) {
+      $("result").textContent = "도시를 찾지 못했어요.";
+      $("note").textContent = "영어 이름으로 입력해 보세요. 예: Seoul, Busan, Jeju";
+      return;
+    }
+    if (!res.ok) {
+      $("result").textContent = "날씨를 가져오지 못했어요.";
+      $("note").textContent = "잠시 뒤에 다시 시도해 주세요. (오류 번호 " + res.status + ")";
+      return;
+    }
+
+    const data = await res.json();
+    const temp = Math.round(data.main.temp);
+    const desc = data.weather[0].description;
+    $("result").textContent = data.name + " " + temp + "°C, " + desc;
+    $("note").textContent = "습도 " + data.main.humidity + "%";
+  } catch (err) {
+    $("result").textContent = "인터넷 연결을 확인해 주세요.";
+    $("note").textContent = "";
+  }
+}
+
+$("go").addEventListener("click", showWeather);
+</script>
+</body>
+</html>
